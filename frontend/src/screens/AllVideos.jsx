@@ -47,7 +47,7 @@ export default function AllVideos() {
     const fetchVideos = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('http://192.168.3.128:8000/get-all-videos/');
+            const response = await axios.get('http://192.168.0.115:8000/get-all-videos/');
             setVideos(response.data);
         } catch (error) {
             toast({

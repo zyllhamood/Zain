@@ -98,7 +98,7 @@ export default function CreatePhotos() {
                 formData.append('media_type', 'photo');
 
                 const response = await axios.post(
-                    'http://192.168.3.128:8000/upload-image/',
+                    'http://192.168.0.115:8000/upload-image/',
                     formData,
                     {
                         headers: {

@@ -73,7 +73,7 @@ export default function EditVideo() {
             setLoading(true);
             try {
                 const response = await axios.get(
-                    `http://192.168.3.128:8000/edit-video/${id}/`,
+                    `http://192.168.0.115:8000/edit-video/${id}/`,
                     {
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -148,7 +148,7 @@ export default function EditVideo() {
             formData.append('media_type', 'video');
 
             const response = await axios.post(
-                'http://192.168.3.128:8000/upload-image/',
+                'http://192.168.0.115:8000/upload-image/',
                 formData,
                 {
                     headers: {
@@ -223,7 +223,7 @@ export default function EditVideo() {
         setUpdating(true);
         try {
             await axios.put(
-                `http://192.168.3.128:8000/edit-video/${id}/`,
+                `http://192.168.0.115:8000/edit-video/${id}/`,
                 {
                     text: text,
                     image_url: imageUrl || '',

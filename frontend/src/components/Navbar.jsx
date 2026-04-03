@@ -1,239 +1,277 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Flex,
     Image,
-    Link,
     Button,
     IconButton,
+    Drawer,
+    DrawerBody,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    VStack,
+    Link,
+    useDisclosure,
 } from '@chakra-ui/react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { Icon } from '@iconify/react';
 import logo from '../images/logo.png';
 
+// Motion Components
+const MotionBox = motion(Box);
+const MotionLink = motion(Link);
+
 export default function Navbar() {
+    const { scrollY } = useScroll();
+    const [isScrolled, setIsScrolled] = useState(false);
     const location = useLocation();
     const isHomePage = location.pathname === '/';
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
-    // Handle navigation - if on home page, use hash, otherwise navigate to home with hash
+    // Detect Scroll for Glass Effect
+    useMotionValueEvent(scrollY, "change", (latest) => {
+        setIsScrolled(latest > 20);
+    });
+
+    // Navigation Handler
     const handleNavClick = (e, hash) => {
         e.preventDefault();
+        onClose();
         if (isHomePage) {
-            // On home page, just scroll to section
             const element = document.querySelector(hash);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth' });
             }
         } else {
-            // On other pages, navigate to home with hash
             window.location.href = `/${hash}`;
         }
     };
 
+    const navLinks = [
+        { name: 'الرئيسية', hash: '#home' },
+        { name: 'خدماتي', hash: '#services' }, // Corrected to 'خدماتي' as per original file context, or user said 'خدماتنا' in prompt? 
+        // User prompt: "Center: Navigation Links (الرئيسية - خدماتنا)"
+        // Original file: "الرئيسية" and "خدماتي".
+        // I will use "الرئيسية" and "خدماتنا" as per User Request this time, but point to #services.
+    ];
+
+    // Correction: User explicitly listed (الرئيسية - خدماتنا).
+
     return (
-        <Flex
-            as="header"
-            justify="space-between"
-            align="center"
-            px={{ base: 4, md: 12, lg: 24 }}
-            py={{ base: 4, md: 5 }}
-            bg="rgba(255, 255, 255, 0.98)"
-            backdropFilter="blur(20px)"
-            borderBottom="1px"
-            borderColor="rgba(35, 31, 32, 0.08)"
-            position="fixed"
-            top={0}
-            left={0}
-            right={0}
-            zIndex={1000}
-            transition="all 0.3s ease"
-            boxShadow="0 4px 20px rgba(0, 0, 0, 0.03)"
-        >
-            {/* Logo */}
-            <Box>
-                <RouterLink to="/">
-                    <Image
-                        src={logo}
-                        alt="Zain Logo"
-                        h={{ base: '45px', md: '60px' }}
-                        objectFit="contain"
-                        transition="all 0.3s ease"
-                        _hover={{ transform: 'scale(1.05)', filter: 'brightness(1.1)' }}
-                        cursor="pointer"
-                    />
-                </RouterLink>
-            </Box>
-
-            {/* Desktop Navigation */}
-            <Flex
-                gap={{ base: 0, md: 2, lg: 3 }}
-                align="center"
-                dir="rtl"
-                display={{ base: 'none', md: 'flex' }}
+        <>
+            <MotionBox
+                as="header"
+                position="fixed"
+                top={0}
+                left={0}
+                right={0}
+                zIndex={1000}
+                initial={{ backgroundColor: "rgba(52, 48, 50, 0)", backdropFilter: "blur(0px)" }}
+                animate={{
+                    backgroundColor: isScrolled ? "rgba(52, 48, 50, 0.85)" : "rgba(52, 48, 50, 0)",
+                    backdropFilter: isScrolled ? "blur(10px)" : "blur(0px)",
+                    boxShadow: isScrolled ? "0 4px 30px rgba(0, 0, 0, 0.1)" : "none",
+                }}
+                transition={{ duration: 0.4 }}
+                borderBottom="1px solid"
+                borderColor={isScrolled ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0)"}
             >
-                <Link
-                    as={isHomePage ? 'a' : RouterLink}
-                    href={isHomePage ? '#home' : undefined}
-                    to={!isHomePage ? '/' : undefined}
-                    onClick={(e) => handleNavClick(e, '#home')}
-                    px={6}
-                    py={3}
-                    fontSize={{ md: 'md', lg: 'lg' }}
-                    color="brand.gray"
-                    fontWeight="600"
-                    position="relative"
-                    transition="all 0.3s ease"
-                    borderRadius="8px"
-                    _hover={{
-                        color: 'brand.dark',
-                        bg: 'rgba(35, 31, 32, 0.05)',
-                        transform: 'translateY(-2px)',
-                    }}
-                    _active={{
-                        transform: 'translateY(0)',
-                    }}
+                <Flex
+                    justify="space-between"
+                    align="center"
+                    px={{ base: 6, md: 12, lg: 24 }}
+                    py={{ base: 4, md: 5 }}
+                    dir="rtl"
+                    maxW="1920px"
+                    mx="auto"
                 >
-                    الرئيسية
-                </Link>
+                    {/* RIGHT: Logo */}
+                    <Box flexShrink={0}>
+                        <RouterLink to="/">
+                            <Image
+                                src={logo}
+                                alt="Zain Logo"
+                                h={{ base: '45px', md: '55px' }}
+                                objectFit="contain"
+                                transition="all 0.3s ease"
+                                _hover={{ transform: 'scale(1.05)' }}
+                                cursor="pointer"
+                            />
+                        </RouterLink>
+                    </Box>
 
-                <Link
-                    as={isHomePage ? 'a' : RouterLink}
-                    href={isHomePage ? '#services' : undefined}
-                    to={!isHomePage ? '/' : undefined}
-                    onClick={(e) => handleNavClick(e, '#services')}
-                    px={6}
-                    py={3}
-                    fontSize={{ md: 'md', lg: 'lg' }}
-                    color="brand.gray"
-                    fontWeight="600"
-                    position="relative"
-                    transition="all 0.3s ease"
-                    borderRadius="8px"
-                    _hover={{
-                        color: 'brand.dark',
-                        bg: 'rgba(35, 31, 32, 0.05)',
-                        transform: 'translateY(-2px)',
-                    }}
-                    _active={{
-                        transform: 'translateY(0)',
-                    }}
-                >
-                    خدماتي
-                </Link>
+                    {/* CENTER: Navigation Links (Desktop) */}
+                    <Flex
+                        display={{ base: 'none', md: 'flex' }}
+                        gap={12}
+                        align="center"
+                        position="absolute"
+                        left="50%"
+                        transform="translate(-50%)"
+                    >
+                        {/* Using explicit links as per request */}
+                        <MotionLink
+                            as={isHomePage ? 'a' : RouterLink}
+                            href={isHomePage ? '#home' : undefined}
+                            to={!isHomePage ? '/' : undefined}
+                            onClick={(e) => handleNavClick(e, '#home')}
+                            color="white"
+                            fontSize="lg"
+                            fontWeight="500"
+                            fontFamily="'Cairo', sans-serif"
+                            position="relative"
+                            _hover={{ textDecor: 'none' }}
+                            initial="rest"
+                            whileHover="hover"
+                            animate="rest"
+                        >
+                            الرئيسية
+                            <MotionBox
+                                position="absolute"
+                                bottom="-4px"
+                                left="50%"
+                                h="1px"
+                                bg="white"
+                                initial={{ width: "0%", x: "-50%" }}
+                                variants={{
+                                    rest: { width: "0%" },
+                                    hover: { width: "100%" }
+                                }}
+                                transition={{ duration: 0.3 }}
+                            />
+                        </MotionLink>
 
-                <Button
-                    as={isHomePage ? 'a' : RouterLink}
-                    href={isHomePage ? '#contact' : undefined}
-                    to={!isHomePage ? '/' : undefined}
-                    onClick={(e) => handleNavClick(e, '#contact')}
-                    size={{ md: 'md', lg: 'lg' }}
-                    bg="#231F20"
-                    color="#ffffff"
-                    fontWeight="700"
-                    px={8}
-                    py={6}
-                    borderRadius="8px"
-                    transition="all 0.3s ease"
-                    position="relative"
-                    overflow="hidden"
-                    _hover={{
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 20px rgba(35, 31, 32, 0.2)',
-                        _before: {
-                            transform: 'translateX(0)',
-                        },
-                    }}
-                    _active={{
-                        transform: 'translateY(0)',
-                    }}
-                    _before={{
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0,
-                        bg: '#414042',
-                        transform: 'translateX(-100%)',
-                        transition: 'transform 0.3s ease',
-                        zIndex: -1,
-                    }}
-                >
-                    تواصل معنا
-                </Button>
-            </Flex>
+                        <MotionLink
+                            as={isHomePage ? 'a' : RouterLink}
+                            href={isHomePage ? '#services' : undefined}
+                            to={!isHomePage ? '/' : undefined}
+                            onClick={(e) => handleNavClick(e, '#services')}
+                            color="white"
+                            fontSize="lg"
+                            fontWeight="500"
+                            fontFamily="'Cairo', sans-serif"
+                            position="relative"
+                            _hover={{ textDecor: 'none' }}
+                            initial="rest"
+                            whileHover="hover"
+                            animate="rest"
+                        >
+                            خدماتنا
+                            <MotionBox
+                                position="absolute"
+                                bottom="-4px"
+                                left="50%"
+                                h="1px"
+                                bg="white"
+                                initial={{ width: "0%", x: "-50%" }}
+                                variants={{
+                                    rest: { width: "0%" },
+                                    hover: { width: "100%" }
+                                }}
+                                transition={{ duration: 0.3 }}
+                            />
+                        </MotionLink>
+                    </Flex>
 
-            {/* Mobile Navigation - Icon Only */}
-            <Flex
-                gap={2}
-                align="center"
-                dir="rtl"
-                display={{ base: 'flex', md: 'none' }}
-            >
-                <IconButton
-                    as={isHomePage ? 'a' : RouterLink}
-                    href={isHomePage ? '#home' : undefined}
-                    to={!isHomePage ? '/' : undefined}
-                    onClick={(e) => handleNavClick(e, '#home')}
-                    aria-label="Home"
-                    icon={<Icon icon="mdi:home" width="22" height="22" />}
-                    size="md"
-                    variant="ghost"
-                    color="brand.gray"
-                    transition="all 0.3s ease"
-                    _hover={{
-                        bg: 'rgba(35, 31, 32, 0.08)',
-                        color: 'brand.dark',
-                        transform: 'translateY(-2px)',
-                    }}
-                    _active={{
-                        transform: 'translateY(0)',
-                    }}
-                />
+                    {/* LEFT: CTA Button (Desktop) & Mobile Menu Toggle */}
+                    <Flex align="center" gap={4}>
+                        <Button
+                            display={{ base: 'none', md: 'flex' }}
+                            as={isHomePage ? 'a' : RouterLink}
+                            href={isHomePage ? '#contact' : undefined}
+                            to={!isHomePage ? '/' : undefined}
+                            onClick={(e) => handleNavClick(e, '#contact')}
+                            size="md"
+                            rounded="full"
+                            px={8}
+                            fontFamily="'Cairo', sans-serif"
+                            bg={isScrolled ? "white" : "transparent"}
+                            color={isScrolled ? "#343032" : "white"}
+                            border="1px solid white"
+                            fontWeight="bold"
+                            transition="all 0.3s ease"
+                            _hover={{
+                                transform: 'scale(1.05)',
+                                bg: "white",
+                                color: "#343032",
+                                boxShadow: "0 4px 15px rgba(255,255,255,0.3)"
+                            }}
+                        >
+                            تواصل معنا
+                        </Button>
 
-                <IconButton
-                    as={isHomePage ? 'a' : RouterLink}
-                    href={isHomePage ? '#services' : undefined}
-                    to={!isHomePage ? '/' : undefined}
-                    onClick={(e) => handleNavClick(e, '#services')}
-                    aria-label="Services"
-                    icon={<Icon icon="mdi:briefcase" width="22" height="22" />}
-                    size="md"
-                    variant="ghost"
-                    color="brand.gray"
-                    transition="all 0.3s ease"
-                    _hover={{
-                        bg: 'rgba(35, 31, 32, 0.08)',
-                        color: 'brand.dark',
-                        transform: 'translateY(-2px)',
-                    }}
-                    _active={{
-                        transform: 'translateY(0)',
-                    }}
-                />
+                        <IconButton
+                            display={{ base: 'flex', md: 'none' }}
+                            onClick={onOpen}
+                            icon={<Icon icon="mdi:menu" width="28" height="28" />}
+                            variant="ghost"
+                            color="white"
+                            aria-label="Open Menu"
+                            _hover={{ bg: "whiteAlpha.200" }}
+                            _active={{ bg: "whiteAlpha.300" }}
+                        />
+                    </Flex>
+                </Flex>
+            </MotionBox>
 
-                <IconButton
-                    as={isHomePage ? 'a' : RouterLink}
-                    href={isHomePage ? '#contact' : undefined}
-                    to={!isHomePage ? '/' : undefined}
-                    onClick={(e) => handleNavClick(e, '#contact')}
-                    aria-label="Contact"
-                    icon={<Icon icon="mdi:email" width="22" height="22" color="#ffffff" />}
-                    size="md"
-                    bg="#231F20"
-                    color="#ffffff"
-                    transition="all 0.3s ease"
-                    _hover={{
-                        bg: '#414042',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 12px rgba(35, 31, 32, 0.2)',
-                    }}
-                    _active={{
-                        transform: 'translateY(0)',
-                    }}
-                />
-            </Flex>
-        </Flex>
+            {/* Mobile Menu Drawer (High-End Style) */}
+            <Drawer placement="top" onClose={onClose} isOpen={isOpen} size="full">
+                <DrawerOverlay bg="rgba(52, 48, 50, 0.4)" backdropFilter="blur(5px)" />
+                <DrawerContent bg="#343032" color="white">
+                    <DrawerCloseButton mt={6} ml={6} size="lg" _focus={{ boxShadow: "none" }} color="white" />
+                    <DrawerBody display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+                        <VStack spacing={8} dir="rtl">
+                            <Link
+                                as={isHomePage ? 'a' : RouterLink}
+                                href={isHomePage ? '#home' : undefined}
+                                to={!isHomePage ? '/' : undefined}
+                                onClick={(e) => handleNavClick(e, '#home')}
+                                fontSize="3xl"
+                                fontWeight="700"
+                                fontFamily="'Cairo', sans-serif"
+                                _hover={{ color: "gray.300", transform: "scale(1.05)" }}
+                                transition="all 0.3s"
+                            >
+                                الرئيسية
+                            </Link>
+
+                            <Link
+                                as={isHomePage ? 'a' : RouterLink}
+                                href={isHomePage ? '#services' : undefined}
+                                to={!isHomePage ? '/' : undefined}
+                                onClick={(e) => handleNavClick(e, '#services')}
+                                fontSize="3xl"
+                                fontWeight="700"
+                                fontFamily="'Cairo', sans-serif"
+                                _hover={{ color: "gray.300", transform: "scale(1.05)" }}
+                                transition="all 0.3s"
+                            >
+                                خدماتنا
+                            </Link>
+
+                            <Button
+                                as={isHomePage ? 'a' : RouterLink}
+                                href={isHomePage ? '#contact' : undefined}
+                                to={!isHomePage ? '/' : undefined}
+                                onClick={(e) => handleNavClick(e, '#contact')}
+                                size="lg"
+                                rounded="full"
+                                px={12}
+                                py={8}
+                                mt={8}
+                                bg="white"
+                                color="#343032"
+                                fontFamily="'Cairo', sans-serif"
+                                _hover={{ transform: 'scale(1.05)', boxShadow: "0 4px 20px rgba(0,0,0,0.2)" }}
+                            >
+                                تواصل معنا
+                            </Button>
+                        </VStack>
+                    </DrawerBody>
+                </DrawerContent>
+            </Drawer>
+        </>
     );
 }
-

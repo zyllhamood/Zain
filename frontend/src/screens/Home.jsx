@@ -1,928 +1,457 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-    ChakraProvider,
-    extendTheme,
     Box,
     Flex,
     Heading,
     Text,
     Image,
     Button,
+    Grid,
+    SimpleGrid,
+    VStack,
+    HStack,
+    Icon,
     Link,
+    GridItem,
+    useBreakpointValue,
 } from '@chakra-ui/react';
+import { motion, AnimatePresence, animate, useInView } from 'framer-motion';
+import { Icon as Iconify } from '@iconify/react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Icon } from '@iconify/react';
+
+// Assets
 import logo from '../images/logo.png';
 import me from '../images/me.png';
 import logo_name from '../images/name.png';
 import logos from '../images/logos.png';
-// Custom Chakra Theme with Cairo font and custom colors
-const theme = extendTheme({
-    colors: {
-        brand: {
-            dark: '#231F20',
-            gray: '#414042',
-            white: '#ffffff',
-        },
-    },
-    fonts: {
-        heading: "'Cairo', sans-serif",
-        body: "'Cairo', sans-serif",
-    },
-    styles: {
-        global: {
-            body: {
-                bg: '#ffffff',
-                color: '#231F20',
-            },
-            '*': {
-                scrollBehavior: 'smooth',
-            },
-        },
-    },
-});
 
-// Service Icon Component
-const ServiceIconBox = ({ icon, titleEn, titleAr }) => {
+// Motion Components
+const MotionBox = motion(Box);
+const MotionFlex = motion(Flex);
+const MotionText = motion(Text);
+const MotionImage = motion(Image);
+
+// --- Counter Component ---
+const Counter = ({ from, to }) => {
+    const nodeRef = React.useRef();
+    const isInView = useInView(nodeRef, { once: true, margin: "-100px" });
+
+    React.useEffect(() => {
+        const node = nodeRef.current;
+        if (isInView) {
+            const controls = animate(from, to, {
+                duration: 2.5,
+                ease: "easeOut",
+                onUpdate(value) {
+                    node.textContent = Math.floor(value) + "+";
+                }
+            });
+            return () => controls.stop();
+        }
+    }, [from, to, isInView]);
+
     return (
-        <Flex
-            direction={{ base: 'row', md: 'column' }}
-            align="center"
-            gap={{ base: 4, md: 0 }}
-            p={{ base: 3, md: 2 }}
-            position="relative"
-            transition="all 0.4s ease"
-
-            w={{ base: 'full', md: 'auto' }}
-            maxW={{ base: '280px', md: 'none' }}
-
+        <Text
+            ref={nodeRef}
+            fontSize={{ base: "5xl", md: "7xl" }}
+            fontWeight="900"
+            color="white"
+            lineHeight="1"
+            fontFamily="'Cairo', sans-serif"
         >
-            <Flex
-                w={{ base: '60px', md: '80px' }}
-                h={{ base: '60px', md: '80px' }}
-                border="2px solid"
-                borderColor="brand.dark"
-                align="center"
-                justify="center"
-                mb={{ base: 0, md: 4 }}
-                transition="all 0.4s ease"
-                flexShrink={0}
-            >
-                <Icon icon={icon} width={32} color="#231F20" />
-            </Flex>
-            <Flex direction="column" align={{ base: 'flex-start', md: 'center' }}>
-                <Text
-                    fontSize={{ base: 'md', md: 'xs' }}
-                    color="brand.dark"
-                    fontWeight={{ base: '600', md: '300' }}
-                    letterSpacing="wide"
-                >
-                    {titleEn}
-                </Text>
-                <Text
-                    fontSize={{ base: 'xs', md: 'xs' }}
-                    color="gray.500"
-                    fontWeight="300"
-                    display={{ base: 'block', md: 'none' }}
-                >
-                    {titleAr}
-                </Text>
-            </Flex>
-        </Flex>
+            0+
+        </Text>
     );
 };
 
-export default function Home() {
+// --- Services Component (New Design) ---
+const ServicesSection = () => {
+    const [hovered, setHovered] = useState(null); // 'photo' | 'video' | null
+    const isMobile = useBreakpointValue({ base: true, lg: false });
+
+    // Animation Variants
+    const panelVariants = {
+        idle: { flex: 1 },
+        hover: { flex: 2.5 },
+        shrunk: { flex: 0.6 },
+    };
+
+    // Helper to determine state
+    const getVariant = (id) => {
+        if (isMobile) return "idle"; // No expansion on mobile
+        if (hovered === id) return "hover";
+        if (hovered && hovered !== id) return "shrunk";
+        return "idle";
+    };
 
     return (
-        <ChakraProvider theme={theme}>
-            <Box>
-                {/* Revolutionary Hero Section */}
-                <Box
-                    id="home"
+        <Box bg="#343032" w="full" overflow="hidden">
+            <Flex
+                direction={{ base: 'column', lg: 'row' }}
+                h={{ base: "auto", lg: "90vh" }}
+                minH={{ base: "auto", lg: "700px" }}
+            >
+                {/* --- Panel A: Photography (#343032) --- */}
+                <MotionFlex
+                    layout
+                    variants={panelVariants}
+                    animate={getVariant('photo')}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    bg="#343032"
+                    color="white"
+                    direction="column"
+                    justify="center"
+                    align="center"
                     position="relative"
-                    minH="100vh"
-                    bg="brand.white"
-                    overflow="hidden"
-                    pt={{ base: '40px', md: '100px' }}
+                    onMouseEnter={() => setHovered('photo')}
+                    onMouseLeave={() => setHovered(null)}
+                    py={{ base: 20, lg: 0 }}
+                    px={{ base: 6, lg: 10 }}
+                    borderRight={{ lg: "1px solid rgba(255,255,255,0.1)" }}
                 >
-                    {/* Geometric Background Elements */}
-                    <Box
-                        position="absolute"
-                        top="10%"
-                        right="-5%"
-                        w="400px"
-                        h="400px"
-                        border="80px solid"
-                        borderColor="brand.dark"
-                        opacity={0.03}
-                        transform="rotate(45deg)"
-                        display={{ base: 'none', lg: 'block' }}
-                    />
-                    <Image
-                        src={logo}
-                        alt="Logo Background"
-                        position="absolute"
-                        bottom={{ base: '10%', lg: '5%' }}
-                        left={{ base: '-20%', lg: '-3%' }}
-                        w={{ base: '300px', lg: '400px' }}
-                        h={{ base: '300px', lg: '400px' }}
-                        objectFit="contain"
-                        opacity={0.05}
-                        display={{ base: 'block', lg: 'block' }}
-                    />
+                    {/* Content Container */}
+                    <VStack spacing={6} maxW="500px" textAlign="center" zIndex={2}>
+                        <MotionBox
+                            animate={{ scale: hovered === 'photo' ? 1.2 : 1 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Icon as={Iconify} icon="mdi:camera-iris" width="120px" height="120px" color={hovered === 'photo' ? "white" : "rgba(255,255,255,0.2)"} transition="0.5s" />
+                        </MotionBox>
 
-                    <Flex
-                        direction="column"
-                        align={{ base: 'center', md: 'center' }}
-                        justify="center"
-                        minH="calc(100vh - 100px)"
-                        px={{ base: 6, md: 12, lg: 20 }}
-                        textAlign={{ base: 'right', md: 'center' }}
-                        position="relative"
-                        zIndex={1}
-                    >
-                        {/* Name Display */}
-                        <Flex mb={4} mt={4} align="center" justify="center">
+                        <MotionBox animate={{ y: hovered === 'photo' ? -20 : 0 }}>
                             <Heading
-                                as="h1"
-                                fontSize={{ base: '5xl', md: '7xl', lg: '8xl' }}
+                                fontSize={{ base: "4xl", md: "6xl", lg: "7xl" }}
                                 fontWeight="900"
-                                color="brand.dark"
-                                textAlign={{ base: 'right', md: 'center' }}
-                                letterSpacing="tight"
-                                display={'none'}
+                                lineHeight="1.4"
+                                fontFamily={'Cairo'}
                             >
-                                زين العابدين
+                                التصوير <br /> الفوتوغرافي
                             </Heading>
-                            <Image src={logo_name} alt="Me" width={{ base: '50%', md: '60%' }} />
-                        </Flex>
+                        </MotionBox>
 
-                        {/* Subtitle with Modern Typography */}
-                        <Flex align="center" justify="center" gap={4} mb={14} mt={-8}>
-                            <Box w="50px" h="1px" bg="brand.dark" opacity={0.4} display={{ base: 'none', md: 'block' }} />
-                            <Heading
-                                as="h2"
-                                fontSize={{ base: 'xl', md: '2xl', lg: '2xl' }}
-                                fontWeight="300"
-                                color="gray.600"
-                                letterSpacing="wide"
-
-                            >
-                                مصور | Photography
-                            </Heading>
-                            <Box w="50px" h="1px" bg="brand.dark" opacity={0.4} display={{ base: 'none', md: 'block' }} />
-                        </Flex>
-
-                        {/* Services Icons - Responsive Design */}
-                        <Flex
-                            direction={{ base: 'column', md: 'row' }}
-                            gap={{ base: 3, md: 12 }}
-                            mt={{ base: 0, md: 12 }}
-                            justify="center"
-                            align={{ base: 'flex-start', md: 'center' }}
-                            maxW={{ base: '100%', md: '800px' }}
-                            w="full"
-                        >
-                            <ServiceIconBox
-                                icon="mdi:camera-iris"
-                                titleEn="PHOTOGRAPHY"
-                                titleAr="التصوير الفوتوغرافي"
-                            />
-                            <ServiceIconBox
-                                icon="mdi:video-vintage"
-                                titleEn="VIDEOGRAPHY"
-                                titleAr="التصوير الفيديو"
-                            />
-                            <ServiceIconBox
-                                icon="mdi:quadcopter"
-                                titleEn="DRONE"
-                                titleAr="تصوير الدرون"
-                            />
-                        </Flex>
-
-                        {/* Scroll Indicator */}
-                        <Flex
-                            direction="column"
-                            align="center"
-                            position="absolute"
-                            bottom="40px"
-                            left="50%"
-                            transform="translateX(-50%)"
-                            animation="bounce 2s ease-in-out infinite"
-                            display={{ base: 'none', md: 'none' }}
-                        >
-                            <Box
-                                w="1px"
-                                h="40px"
-                                bg="gray.400"
-                                opacity={0.5}
-                                mb={2}
-                            />
-                            <Icon icon="mdi:chevron-down" width="24" height="24" color="gray.400" />
-                        </Flex>
-                    </Flex>
-                </Box>
-
-                {/* Statistics Section - New Addition */}
-                <Box bg="brand.dark" py={{ base: 12, md: 16 }}>
-                    <Flex
-                        maxW="1400px"
-                        mx="auto"
-                        px={{ base: 4, md: 12 }}
-                        gap={{ base: 2, md: 12 }}
-                        flexWrap="nowrap"
-                        justify="space-around"
-                        align="center"
-                    >
-                        <Flex direction="column" align="center" flex="1" minW={0}>
-                            <Heading fontSize={{ base: '2xl', sm: '3xl', md: '6xl' }} color="brand.white" fontWeight="bold">
-                                2300+
-                            </Heading>
-                            <Text fontSize={{ base: 'xs', sm: 'sm', md: 'md' }} color="brand.white" opacity={0.7} mt={{ base: 1, md: 2 }} fontWeight="300" textAlign="center">
-                                مشروع منجز
-                            </Text>
-                        </Flex>
-                        <Box w="1px" h={{ base: '40px', md: '60px' }} bg="brand.white" opacity={0.2} display={{ base: 'block', md: 'block' }} />
-                        <Flex direction="column" align="center" flex="1" minW={0}>
-                            <Heading fontSize={{ base: '2xl', sm: '3xl', md: '6xl' }} color="brand.white" fontWeight="bold">
-                                750+
-                            </Heading>
-                            <Text fontSize={{ base: 'xs', sm: 'sm', md: 'md' }} color="brand.white" opacity={0.7} mt={{ base: 1, md: 2 }} fontWeight="300" textAlign="center">
-                                عميل راضٍ
-                            </Text>
-                        </Flex>
-                        <Box w="1px" h={{ base: '40px', md: '60px' }} bg="brand.white" opacity={0.2} display={{ base: 'block', md: 'block' }} />
-                        <Flex direction="column" align="center" flex="1" minW={0}>
-                            <Heading fontSize={{ base: '2xl', sm: '3xl', md: '6xl' }} color="brand.white" fontWeight="bold">
-                                9+
-                            </Heading>
-                            <Text fontSize={{ base: 'xs', sm: 'sm', md: 'md' }} color="brand.white" opacity={0.7} mt={{ base: 1, md: 2 }} fontWeight="300" textAlign="center">
-                                سنوات خبرة
-                            </Text>
-                        </Flex>
-                    </Flex>
-                </Box>
-
-                {/* About Section - Asymmetric Modern Design */}
-                <Box
-                    id="about"
-                    bg="brand.white"
-                    py={{ base: 20, md: 32 }}
-                    px={{ base: 6, md: 12, lg: 20 }}
-                    position="relative"
-                >
-                    <Flex
-                        maxW="1400px"
-                        mx="auto"
-                        direction={{ base: 'column', lg: 'row' }}
-                        gap={16}
-                        align="center"
-                    >
-                        {/* Left Side - Decorative */}
-                        <Box flex="1" position="relative" display={{ base: 'none', lg: 'block' }}>
-                            {/* Decorative element - positioned behind */}
-                            <Box
-                                position="absolute"
-                                top="30px"
-                                right="-30px"
-                                w="100%"
-                                h="500px"
-                                border="3px solid"
-                                borderColor="brand.dark"
-                                opacity={0.2}
-                                zIndex={0}
-                            />
-
-                            {/* Main image container */}
-                            <Box
-                                w="100%"
-                                h="500px"
-                                position="relative"
-                                overflow="hidden"
-                                boxShadow="0 20px 60px rgba(0, 0, 0, 0.15)"
-                                transition="all 0.4s ease"
-                                zIndex={1}
-
-                            >
-                                <Image
-                                    src={me}
-                                    alt="Zain Alabdin - Photographer"
-                                    w="100%"
-                                    h="100%"
-                                    objectFit="cover"
-                                    objectPosition="center"
-                                />
-
-                                {/* Subtle gradient overlay for better visual */}
-                                <Box
-                                    position="absolute"
-                                    bottom="0"
-                                    left="0"
-                                    right="0"
-                                    h="150px"
-                                    bgGradient="linear(to-t, rgba(35, 31, 32, 0.4), transparent)"
-                                    pointerEvents="none"
-                                />
-                            </Box>
-                        </Box>
-
-                        {/* Right Side - Content */}
-                        <Flex direction="column" flex="1" dir="rtl">
-                            <Text
-                                fontSize={{ base: 'sm', md: 'md' }}
-                                color="brand.gray"
-                                fontWeight="600"
-                                letterSpacing="widest"
-                                mb={4}
-                                textTransform="uppercase"
-                            >
-                                من أنا
-                            </Text>
-
-                            <Heading
-                                as="h3"
-                                fontSize={{ base: '3xl', md: '5xl', lg: '6xl' }}
-                                fontWeight="bold"
-                                color="brand.dark"
-                                mb={8}
-                                lineHeight="1.2"
-                            >
-                                رحلة الإبداع
-
-                                والشغف
-                            </Heading>
-
-                            <Box w="80px" h="4px" bg="brand.dark" mb={8} />
-
-                            <Text
-                                fontSize={{ base: 'lg', md: 'xl' }}
-                                color="brand.gray"
-                                lineHeight="tall"
-                                mb={6}
-                                fontWeight="300"
-                            >
-                                أنا مصور محترف متخصص في التصوير الفوتوغرافي والفيديو، أقدم خدماتي للأفراد والشركات على حد سواء.
-                                أؤمن بأن كل لحظة تستحق أن تُخلَّد بأجمل صورة، ولذلك أعمل بشغف لتقديم أعمال فنية تعكس جمال اللحظة.
-                            </Text>
-
-                            <Text
-                                fontSize={{ base: 'lg', md: 'xl' }}
-                                color="brand.gray"
-                                lineHeight="tall"
-                                fontWeight="300"
-                            >
-                                مع سنوات من الخبرة في هذا المجال، أسعى دائماً لتحقيق رؤية عملائي وتجاوز توقعاتهم من خلال
-                                الإبداع والاحترافية والاهتمام بأدق التفاصيل.
-                            </Text>
-                        </Flex>
-                    </Flex>
-                </Box>
-
-                {/* Services Section - Ultra Modern */}
-                <Box
-                    id="services"
-                    bg="brand.dark"
-                    py={{ base: 20, md: 32 }}
-                    px={{ base: 6, md: 12, lg: 20 }}
-                    position="relative"
-                >
-                    <Flex direction="column" align="center" mb={16}>
-                        <Text
-                            fontSize={{ base: 'sm', md: 'md' }}
-                            color="brand.white"
-                            fontWeight="600"
-                            letterSpacing="widest"
-                            mb={4}
-                            textTransform="uppercase"
-                            opacity={0.7}
-                        >
-                            خدماتنا
-                        </Text>
-
-                        <Heading
-                            as="h3"
-                            fontSize={{ base: '3xl', md: '5xl', lg: '6xl' }}
-                            fontWeight="bold"
-                            color="brand.white"
-                            mb={6}
-                            textAlign="center"
-                        >
-                            ما نقدمه لك
-                        </Heading>
-
-                        <Box w="80px" h="4px" bg="brand.white" />
-                    </Flex>
-
-                    {/* Services Content - Split Layout */}
-                    <Flex
-                        direction={{ base: 'column', lg: 'row' }}
-                        gap={{ base: 12, lg: 8 }}
-                        maxW="1400px"
-                        mx="auto"
-                    >
-                        {/* Photography Section - Right Side */}
-                        <Flex
-                            direction="column"
-                            flex="1"
-                            dir="rtl"
-                        >
-                            <Flex align="center" gap={3} mb={6}>
-                                <Icon icon="mdi:camera-iris" width="32" height="32" color="#ffffff" />
-                                <Heading
-                                    as="h4"
-                                    fontSize={{ base: '2xl', md: '3xl' }}
-                                    fontWeight="bold"
-                                    color="brand.white"
+                        {/* Revealed Content */}
+                        <AnimatePresence>
+                            {(hovered === 'photo' || isMobile) && (
+                                <MotionBox
+                                    initial={{ opacity: 0, y: 20, height: 0 }}
+                                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                                    exit={{ opacity: 0, y: 10, height: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.1 }}
+                                    overflow="hidden"
                                 >
-                                    التصوير الفوتوغرافي
-                                </Heading>
-                            </Flex>
+                                    <VStack spacing={4} pt={4} align="center">
+                                        <Text color="gray.400" fontSize="lg" maxW="400px">
+                                            تصوير بورتريه، منتجات، أطعمة، ومناسبات بأحدث التقنيات والإضاءة السينمائية.
+                                        </Text>
 
-                            <Flex
-                                direction="column"
-                                gap={4}
-                                mb={8}
-                            >
-                                {[
-                                    { title: 'تصوير أشخاص', subtitle: 'Portraits' },
-                                    { title: 'تصوير مطاعم ومأكولات', subtitle: 'Food Photography' },
-                                    { title: 'تصوير منتجات', subtitle: 'Product Photography' },
-                                    { title: 'تصوير فعاليات', subtitle: 'Events Photography' },
-                                ].map((service, index) => (
-                                    <Flex
-                                        key={index}
-                                        align="center"
-                                        gap={3}
-                                        p={4}
-                                        bg="rgba(255, 255, 255, 0.05)"
-                                        borderRadius="8px"
-                                        transition="all 0.3s ease"
-                                        _hover={{
-                                            bg: { base: 'rgba(255, 255, 255, 0.05)', md: 'rgba(255, 255, 255, 0.1)' },
-                                            transform: { base: 'none', md: 'translateX(-5px)' },
-                                        }}
-                                    >
-                                        <Box
-                                            w="8px"
-                                            h="8px"
-                                            bg="brand.white"
-                                            borderRadius="50%"
-                                            flexShrink={0}
-                                        />
-                                        <Flex direction="column" flex="1">
-                                            <Text
-                                                fontSize={{ base: 'md', md: 'lg' }}
-                                                fontWeight="600"
-                                                color="brand.white"
-                                            >
-                                                {service.title}
-                                            </Text>
-                                            <Text
-                                                fontSize={{ base: 'xs', md: 'sm' }}
-                                                color="brand.white"
-                                                opacity={0.6}
-                                            >
-                                                {service.subtitle}
-                                            </Text>
-                                        </Flex>
-                                    </Flex>
-                                ))}
-                            </Flex>
+                                        <Button
+                                            as={RouterLink}
+                                            to="/all-photos"
+                                            variant="outline"
+                                            color="white"
+                                            borderColor="white"
+                                            _hover={{ bg: "white", color: "#343032" }}
+                                            size="lg"
+                                            px={12}
+                                            borderRadius="0"
+                                        >
+                                            استكشف المعرض
+                                        </Button>
+                                    </VStack>
+                                </MotionBox>
+                            )}
+                        </AnimatePresence>
+                    </VStack>
 
-                            <Button
-                                as={RouterLink}
-                                to="/all-photos"
-                                size="lg"
-                                bg="brand.white"
-                                color="brand.dark"
-                                fontWeight="bold"
-                                px={8}
-                                py={6}
-                                borderRadius="8px"
-                                transition="all 0.3s ease"
-                                _hover={{
-                                    bg: { base: 'brand.white', md: 'brand.gray' },
-                                    color: { base: 'brand.dark', md: 'brand.white' },
-                                    transform: { base: 'none', md: 'translateY(-2px)' },
-                                    boxShadow: { base: 'none', md: '0 8px 20px rgba(0, 0, 0, 0.2)' },
-                                }}
-                                rightIcon={<Icon icon="mdi:arrow-left" width="20" height="20" />}
-                            >
-                                استكشف أعمال التصوير
-                            </Button>
-                        </Flex>
-
-                        {/* Divider - Only on Desktop */}
-                        <Box
-                            w="1px"
-                            h="auto"
-                            bg="rgba(255, 255, 255, 0.2)"
-                            display={{ base: 'none', lg: 'block' }}
-                        />
-
-                        {/* Videography Section - Left Side */}
-                        <Flex
-                            direction="column"
-                            flex="1"
-                            dir="rtl"
-                        >
-                            <Flex align="center" gap={3} mb={6}>
-                                <Icon icon="mdi:video-vintage" width="32" height="32" color="#ffffff" />
-                                <Heading
-                                    as="h4"
-                                    fontSize={{ base: '2xl', md: '3xl' }}
-                                    fontWeight="bold"
-                                    color="brand.white"
-                                >
-                                    التصوير الفيديو
-                                </Heading>
-                            </Flex>
-
-                            <Flex
-                                direction="column"
-                                gap={4}
-                                mb={8}
-                            >
-                                {[
-                                    { title: 'تغطيات إعلامية', subtitle: 'Media Coverage' },
-                                    { title: 'أفلام تعريفية', subtitle: 'Promotional Films' },
-                                    { title: 'تصوير درون', subtitle: 'Drone Videography' },
-                                    { title: 'إعلانات تجارية', subtitle: 'Commercial Ads' },
-                                ].map((service, index) => (
-                                    <Flex
-                                        key={index}
-                                        align="center"
-                                        gap={3}
-                                        p={4}
-                                        bg="rgba(255, 255, 255, 0.05)"
-                                        borderRadius="8px"
-                                        transition="all 0.3s ease"
-                                        _hover={{
-                                            bg: { base: 'rgba(255, 255, 255, 0.05)', md: 'rgba(255, 255, 255, 0.1)' },
-                                            transform: { base: 'none', md: 'translateX(-5px)' },
-                                        }}
-                                    >
-                                        <Box
-                                            w="8px"
-                                            h="8px"
-                                            bg="brand.white"
-                                            borderRadius="50%"
-                                            flexShrink={0}
-                                        />
-                                        <Flex direction="column" flex="1">
-                                            <Text
-                                                fontSize={{ base: 'md', md: 'lg' }}
-                                                fontWeight="600"
-                                                color="brand.white"
-                                            >
-                                                {service.title}
-                                            </Text>
-                                            <Text
-                                                fontSize={{ base: 'xs', md: 'sm' }}
-                                                color="brand.white"
-                                                opacity={0.6}
-                                            >
-                                                {service.subtitle}
-                                            </Text>
-                                        </Flex>
-                                    </Flex>
-                                ))}
-                            </Flex>
-
-                            <Button
-                                as={RouterLink}
-                                to="/all-videos"
-                                size="lg"
-                                bg="brand.white"
-                                color="brand.dark"
-                                fontWeight="bold"
-                                px={8}
-                                py={6}
-                                borderRadius="8px"
-                                transition="all 0.3s ease"
-                                _hover={{
-                                    bg: { base: 'brand.white', md: 'brand.gray' },
-                                    color: { base: 'brand.dark', md: 'brand.white' },
-                                    transform: { base: 'none', md: 'translateY(-2px)' },
-                                    boxShadow: { base: 'none', md: '0 8px 20px rgba(0, 0, 0, 0.2)' },
-                                }}
-                                rightIcon={<Icon icon="mdi:arrow-left" width="20" height="20" />}
-                            >
-                                استكشف أعمال الفيديو
-                            </Button>
-                        </Flex>
-                    </Flex>
-                </Box>
-
-                {/* Partners Section - Grid Layout */}
-                <Box
-                    bg="brand.dark"
-                    py={{ base: 20, md: 28 }}
-                    px={{ base: 6, md: 12, lg: 20 }}
-                >
-                    <Flex direction="column" align="center" mb={16}>
-                        <Text
-                            fontSize={{ base: 'sm', md: 'md' }}
-                            color="brand.white"
-                            fontWeight="600"
-                            letterSpacing="widest"
-                            mb={4}
-                            textTransform="uppercase"
-                            opacity={0.7}
-                        >
-                            شركاء النجاح
-                        </Text>
-
-                        <Heading
-                            as="h3"
-                            fontSize={{ base: '3xl', md: '5xl' }}
-                            fontWeight="bold"
-                            color="brand.white"
-                            mb={6}
-                            textAlign="center"
-                        >
-                            عملاء نفتخر بهم
-                        </Heading>
-
-                        <Box w="80px" h="4px" bg="brand.white" />
-                    </Flex>
-
+                    {/* Background Deco */}
                     <Box
-                        maxW="1200px"
-                        mx="auto"
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                    >
-                        <Image
-                            src={logos}
-                            alt="Partners and Clients"
-                            maxW="100%"
-                            h="auto"
-                            objectFit="contain"
-                            opacity={0.9}
-                            transition="all 0.3s ease"
-                            _hover={{
-                                opacity: { base: 0.9, md: 1 },
-                            }}
-                        />
-                    </Box>
-                </Box>
+                        position="absolute" top="0" left="0" w="full" h="full"
+                        bgGradient="linear(to-b, transparent 0%, rgba(52,48,50,0.8) 100%)"
+                        pointerEvents="none"
+                    />
+                </MotionFlex>
 
-                {/* Contact Section - Split Design */}
-                <Box
-                    id="contact"
-                    bg="brand.white"
-                    py={{ base: 20, md: 32 }}
-                    px={{ base: 6, md: 12, lg: 20 }}
+                {/* --- Panel B: Video (White for High Contrast) --- */}
+                <MotionFlex
+                    layout
+                    variants={panelVariants}
+                    animate={getVariant('video')}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    bg="#FFFFFF"
+                    color="#343032"
+                    direction="column"
+                    justify="center"
+                    align="center"
+                    position="relative"
+                    onMouseEnter={() => setHovered('video')}
+                    onMouseLeave={() => setHovered(null)}
+                    py={{ base: 20, lg: 0 }}
+                    px={{ base: 6, lg: 10 }}
                 >
-                    <Flex direction="column" align="center" mb={16}>
-                        <Text
-                            fontSize={{ base: 'sm', md: 'md' }}
-                            color="brand.gray"
-                            fontWeight="600"
-                            letterSpacing="widest"
-                            mb={4}
-                            textTransform="uppercase"
+                    <VStack spacing={6} maxW="500px" textAlign="center" zIndex={2}>
+                        <MotionBox
+                            animate={{ scale: hovered === 'video' ? 1.2 : 1 }}
+                            transition={{ duration: 0.5 }}
                         >
-                            تواصل معنا
-                        </Text>
+                            <Icon as={Iconify} icon="mdi:video-vintage" width="120px" height="120px" color={hovered === 'video' ? "#343032" : "rgba(52, 48, 50, 0.2)"} transition="0.5s" />
+                        </MotionBox>
 
-                        <Heading
-                            as="h3"
-                            fontSize={{ base: '3xl', md: '5xl', lg: '6xl' }}
-                            fontWeight="bold"
-                            color="brand.dark"
-                            mb={6}
-                            textAlign="center"
-                        >
-                            لنبدأ مشروعك
-                        </Heading>
+                        <MotionBox animate={{ y: hovered === 'video' ? -20 : 0 }}>
+                            <Heading
+                                fontSize={{ base: "4xl", md: "6xl", lg: "7xl" }}
+                                fontWeight="900"
+                                lineHeight="1"
+                                fontFamily={'Cairo'}
+                            >
+                                تصوير <br /> الفيديو
+                            </Heading>
+                        </MotionBox>
 
-                        <Box w="80px" h="4px" bg="brand.dark" />
-                    </Flex>
+                        <AnimatePresence>
+                            {(hovered === 'video' || isMobile) && (
+                                <MotionBox
+                                    initial={{ opacity: 0, y: 20, height: 0 }}
+                                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                                    exit={{ opacity: 0, y: 10, height: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.1 }}
+                                    overflow="hidden"
+                                >
+                                    <VStack spacing={4} pt={4} align="center">
+                                        <Text color="gray.600" fontSize="lg" maxW="400px">
+                                            تغطيات، أفلام ترويجية، إعلانات، وتصوير جوي بجودة سينمائية تروي قصتك.
+                                        </Text>
 
-                    <Flex
-                        direction={{ base: 'column', md: 'row' }}
-                        gap={8}
-                        maxW="1000px"
-                        mx="auto"
-                        justify="center"
-                        align="stretch"
-                    >
-                        {/* WhatsApp Contact */}
-                        <Box
-                            flex="1"
-                            bg="brand.dark"
-                            p={{ base: 8, md: 10 }}
-                            borderRadius="12px"
-                            transition="all 0.3s ease"
-                            _hover={{
-                                transform: { base: 'none', md: 'translateY(-5px)' },
-                                boxShadow: { base: 'none', md: '0 10px 30px rgba(0, 0, 0, 0.2)' },
-                            }}
-                        >
-                            <Flex direction="column" align="center" dir="rtl">
-                                <Flex
-                                    w="70px"
-                                    h="70px"
-                                    bg="#25D366"
-                                    align="center"
-                                    justify="center"
-                                    borderRadius="50%"
-                                    mb={6}
-                                >
-                                    <Icon icon="mdi:whatsapp" width="40" height="40" color="#ffffff" />
-                                </Flex>
-                                <Heading
-                                    as="h4"
-                                    fontSize="xl"
-                                    fontWeight="bold"
-                                    color="brand.white"
-                                    mb={4}
-                                    textAlign="center"
-                                >
-                                    تواصل عبر واتساب
-                                </Heading>
-                                <Link
-                                    href="https://wa.me/966554043696"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <Button
-                                        bg="#25D366"
-                                        color="brand.white"
-                                        size="lg"
-                                        fontSize="md"
-                                        fontWeight="bold"
-                                        dir="ltr"
-                                        px={8}
-                                        py={6}
-                                        borderRadius="8px"
-                                        transition="all 0.3s ease"
-                                        _hover={{
-                                            bg: { base: '#25D366', md: '#20BA5A' },
-                                            transform: { base: 'none', md: 'scale(1.05)' },
-                                        }}
-                                        leftIcon={<Icon icon="mdi:whatsapp" width="24" height="24" />}
-                                    >
-                                        +966 55 404 3696
-                                    </Button>
-                                </Link>
-                            </Flex>
-                        </Box>
+                                        <Button
+                                            as={RouterLink}
+                                            to="/all-videos"
+                                            bg="#343032"
+                                            color="white"
+                                            _hover={{ bg: "#4a4446" }}
+                                            size="lg"
+                                            px={12}
+                                            borderRadius="0"
+                                        >
+                                            استكشف المعرض
+                                        </Button>
+                                    </VStack>
+                                </MotionBox>
+                            )}
+                        </AnimatePresence>
+                    </VStack>
+                </MotionFlex>
 
-                        {/* IBAN Info */}
-                        <Box
-                            flex="1"
-                            bg="brand.dark"
-                            p={{ base: 8, md: 10 }}
-                            borderRadius="12px"
-                            transition="all 0.3s ease"
-                            _hover={{
-                                transform: { base: 'none', md: 'translateY(-5px)' },
-                                boxShadow: { base: 'none', md: '0 10px 30px rgba(0, 0, 0, 0.2)' },
-                            }}
-                        >
-                            <Flex direction="column" align="center" dir="rtl">
-                                <Flex
-                                    w="70px"
-                                    h="70px"
-                                    bg="brand.white"
-                                    align="center"
-                                    justify="center"
-                                    borderRadius="50%"
-                                    mb={6}
-                                >
-                                    <Icon icon="mdi:bank" width="40" height="40" color="brand.dark" />
-                                </Flex>
-                                <Heading
-                                    as="h4"
-                                    fontSize="xl"
-                                    fontWeight="bold"
-                                    color="brand.white"
-                                    mb={4}
-                                    textAlign="center"
-                                >
-                                    معلومات التحويل
-                                </Heading>
-                                <Box
-                                    bg="rgba(255, 255, 255, 0.1)"
-                                    p={6}
-                                    borderRadius="8px"
-                                    w="full"
-                                    textAlign="center"
-                                >
-                                    <Text
-                                        fontSize={{ base: 'md', md: 'lg' }}
-                                        color="brand.white"
-                                        fontFamily="monospace"
-                                        fontWeight="600"
-                                        mb={2}
-                                    >
-                                        SA00 0000 0000 0000 0000 0000
-                                    </Text>
-                                    <Text
-                                        fontSize="sm"
-                                        color="brand.white"
-                                        opacity={0.7}
-                                    >
-                                        يرجى إرسال إيصال التحويل بعد الدفع
-                                    </Text>
-                                </Box>
-                            </Flex>
-                        </Box>
-                    </Flex>
-                </Box>
-
-                {/* Footer - Minimalist */}
-                <Box
-                    bg="brand.dark"
-                    py={12}
-                    px={{ base: 6, md: 12, lg: 20 }}
-                    borderTop="1px"
-                    borderColor="rgba(255, 255, 255, 0.1)"
-                >
-                    <Flex
-                        direction={{ base: 'column', md: 'row' }}
-                        justify="space-between"
-                        align="center"
-                        gap={6}
-                        maxW="1400px"
-                        mx="auto"
-                    >
-                        <Text fontSize="sm" color="brand.white" textAlign="center" opacity={0.7}>
-                            © 2025 زين العابدين. جميع الحقوق محفوظة.
-                        </Text>
-                        <Flex gap={6}>
-                            {[
-                                { icon: 'mdi:instagram', link: '#' },
-                                { icon: 'mdi:twitter', link: '#' },
-                                { icon: 'mdi:facebook', link: '#' },
-                                { icon: 'mdi:youtube', link: '#' },
-                            ].map((social, index) => (
-                                <Link
-                                    key={index}
-                                    href={social.link}
-                                    w="45px"
-                                    h="45px"
-                                    display="flex"
-                                    alignItems="center"
-                                    justifyContent="center"
-                                    border="1px solid"
-                                    borderColor="rgba(255, 255, 255, 0.3)"
-                                    transition="all 0.3s ease"
-                                    _hover={{
-                                        bg: { base: 'transparent', md: 'brand.white' },
-                                        borderColor: { base: 'rgba(255, 255, 255, 0.3)', md: 'brand.white' },
-                                        transform: { base: 'none', md: 'translateY(-4px)' },
-                                        '& svg': {
-                                            color: { base: '#ffffff', md: '#231F20' },
-                                        },
-                                    }}
-                                >
-                                    <Icon icon={social.icon} width="24" height="24" color="#ffffff" />
-                                </Link>
-                            ))}
-                        </Flex>
-                    </Flex>
-                </Box>
-
-                {/* Custom Animations */}
-                <style>
-                    {`
-            @keyframes float {
-              0%, 100% {
-                transform: translateX(-50%) translateY(0);
-              }
-              50% {
-                transform: translateX(-50%) translateY(-15px);
-              }
-            }
-            
-            @keyframes bounce {
-              0%, 100% {
-                transform: translateX(-50%) translateY(0);
-              }
-              50% {
-                transform: translateX(-50%) translateY(10px);
-              }
-            }
-            
-            @keyframes fadeIn {
-              from {
-                opacity: 0;
-                transform: translateY(20px);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-          `}
-                </style>
-            </Box>
-        </ChakraProvider>
+            </Flex>
+        </Box>
     );
-}
+};
+
+const Home = () => {
+    // Stats Animation Variants
+    const fadeInUp = {
+        hidden: { opacity: 0, y: 50 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+    };
+
+    return (
+        <Box
+            bg="white"
+            w="full"
+            overflowX="hidden"
+            dir="rtl"
+            fontFamily="'Cairo', sans-serif"
+        >
+            <style>
+                {`@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&display=swap');`}
+            </style>
+
+            {/* 1. HERO SECTION */}
+            <Box
+                h="100vh"
+                w="full"
+                position="relative"
+                bg="white"
+                overflow="hidden"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+            >
+                <Box position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)">
+                    <MotionBox
+                        position="absolute" top="50%" left="50%" w="600px" h="600px"
+                        border="1px solid" borderColor="rgba(52,48,50,0.15)" borderRadius="50%"
+                        style={{ x: '-50%', y: '-50%' }}
+                        animate={{ rotate: 360 }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                    />
+                    <MotionBox
+                        position="absolute" top="50%" left="50%" w="900px" h="900px"
+                        border="1px solid" borderColor="rgba(52,48,50,0.08)" borderRadius="50%"
+                        style={{ x: '-50%', y: '-50%' }}
+                        animate={{ rotate: -360 }} transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+                    />
+                </Box>
+
+                <Box position="relative" zIndex={1} textAlign="center">
+                    <MotionBox
+                        animate={{ rotate: 360 }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                        position="absolute" top="50%" left="50%" transform="translate(-50%, -50%)"
+                        style={{ x: '-50%', y: '-50%' }} w="500px" h="500px" opacity={0.05} zIndex={-1}
+                    >
+                        <Image src={logo} w="full" h="full" objectFit="contain" filter="grayscale(100%)" />
+                    </MotionBox>
+                    <MotionImage
+                        src={logo_name} alt="Zain Alabdin" w={{ base: "250px", md: "400px" }}
+                        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1 }}
+                        mb={6}
+                    />
+
+                </Box>
+
+                <MotionFlex
+                    position="absolute"
+                    bottom="50px"
+                    left="50%"
+                    transform="translateX(-50%)"
+                    bg="rgba(52, 48, 50, 0.05)"
+                    backdropFilter="blur(20px)"
+                    border="1px solid rgba(52, 48, 50, 0.1)"
+                    borderRadius="32px"
+                    px={8}
+                    py={5}
+                    gap={12}
+                    dir="ltr"
+                    align="center"
+                    justify="center"
+                    style={{ x: '-50%' }}
+                    initial={{ y: 100, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
+                >
+                    {[
+                        { icon: 'mdi:camera-iris', label: 'PHOTOGRAPHY' },
+                        { icon: 'mdi:quadcopter', label: 'DRONE' },
+                        { icon: 'mdi:video-vintage', label: 'VIDEOGRAPHY' },
+                    ].map((item, idx) => (
+                        <VStack
+                            key={idx}
+                            as={motion.div}
+                            whileHover={{ scale: 1.05, y: -2 }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                            cursor="pointer"
+                            spacing={3}
+                            minW="100px"
+                            align="center"
+                        >
+                            <Icon as={Iconify} icon={item.icon} width="30px" height="30px" color="#343032" />
+                            <Text
+                                fontSize="11px"
+                                color="#343032"
+                                fontWeight="700"
+                                letterSpacing="2px"
+                                textAlign="center"
+                            >
+                                {item.label}
+                            </Text>
+                        </VStack>
+                    ))}
+                </MotionFlex>
+            </Box>
+
+            {/* 2. STATS SECTION (Restored & Enhanced) */}
+            <Box bg="#343032" py={{ base: 16, md: 20 }} borderTop="1px solid" borderColor="rgba(255,255,255,0.05)">
+                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={0} maxW="1200px" mx="auto" px={{ base: 6, md: 12 }}>
+                    {[{ num: 9, label: "سنوات خبرة" }, { num: 750, label: "عميل راضٍ" }, { num: 2300, label: "مشروع منجز" }].map((stat, i) => (
+                        <Box key={i} position="relative">
+                            <Flex
+                                direction="column"
+                                align="center"
+                                justify="center"
+                                py={6}
+                                borderRight={{ md: i !== 0 ? "1px solid" : "none" }}
+                                borderColor={{ md: "rgba(255,255,255,0.1)" }}
+                                height="100%"
+                            >
+                                <Counter from={0} to={stat.num} />
+                                <Text
+                                    fontSize={{ base: "lg", md: "xl" }}
+                                    color="gray.400"
+                                    fontWeight="400"
+                                    mt={2}
+                                    letterSpacing="wide"
+                                >
+                                    {stat.label}
+                                </Text>
+                            </Flex>
+                        </Box>
+                    ))}
+                </SimpleGrid>
+            </Box>
+
+            {/* 3. SERVICES SECTION (NEW EXPANDING PANELS) */}
+            <ServicesSection />
+
+            {/* 4. ABOUT ME */}
+            <Box p={{ base: 6, md: 20 }} bg="gray.50">
+                <Grid templateColumns={{ base: "1fr", lg: "repeat(12, 1fr)" }} gap={10} maxW="1400px" mx="auto" alignItems="center">
+                    <GridItem colSpan={{ base: 12, lg: 5 }} order={{ base: 2, lg: 1 }}>
+                        <MotionBox initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}>
+                            <Text fontSize="sm" fontWeight="bold" letterSpacing="widest" mb={4} color="gray.500">عن المصور</Text>
+                            <Heading size="3xl" mb={8} lineHeight="1.2" fontFamily={'Cairo'}>رحلة الإبداع <br /> والشغف</Heading>
+                            <Text fontSize="xl" color="gray.600" lineHeight="tall" fontWeight="300" mb={6}>
+                                كل شيء يبدأ بقصة. أرى العالم بعدسة سينمائية، وأحاول تحويل اللحظات العابرة إلى ذكريات خالدة.
+                            </Text>
+                            <Text fontSize="md" color="gray.500" lineHeight="tall">
+                                خبرة طويلة في تقديم محتوى بصري راقٍ يتحدث بصوت أعلى من الكلمات. الدقة، الإضاءة، والتكوين هي أدواتي الأساسية.
+                            </Text>
+                        </MotionBox>
+                    </GridItem>
+                    <GridItem colSpan={{ base: 12, lg: 7 }} order={{ base: 1, lg: 2 }} position="relative">
+                        <Box position="relative" w="full" h="600px" overflow="hidden">
+                            <MotionImage src={me} alt="Zain Alabdin" w="full" h="full" objectFit="cover" initial={{ scale: 1.2, filter: "grayscale(100%)" }} whileInView={{ scale: 1, filter: "grayscale(0%)" }} transition={{ duration: 1.5 }} />
+                            <MotionBox position="absolute" top={0} left={0} right={0} bottom={0} bg="#343032" initial={{ height: "100%" }} whileInView={{ height: "0%" }} transition={{ duration: 1, delay: 0.2, ease: "circOut" }} zIndex={2} />
+                        </Box>
+                    </GridItem>
+                </Grid>
+            </Box>
+
+            {/* 5. CONTACT */}
+            <Box py={{ base: 20, md: 32 }} px={{ base: 6, md: 20 }} bg="white">
+                <MotionBox textAlign="center" mb={20} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}>
+                    <Heading fontSize={{ base: "5xl", md: "8xl" }} fontWeight="900" mb={4} fontFamily={'Cairo'}>لنبدأ مشروعك</Heading>
+                    <Text fontSize="xl" color="gray.400">نحول أفكارك إلى واقع بصري</Text>
+                </MotionBox>
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10} maxW="1200px" mx="auto">
+                    <MotionFlex direction="column" bg="white" border="2px dashed" borderColor="#343032" p={10} justify="space-between" minH="400px" whileHover={{ y: -10 }} transition={{ type: "spring" }}>
+                        <VStack align="flex-start" spacing={0} fontFamily="'Courier New', Courier, monospace">
+                            <Icon as={Iconify} icon="mdi:bank-outline" width="40px" height="40px" mb={6} />
+                            <Text fontSize="sm" color="gray.500">معلومات التحويل</Text>
+                            <Text fontSize="2xl" fontWeight="bold" mt={2}>زين العابدين</Text>
+                            <Text fontSize="md" mt={1}>بنك الرياض</Text>
+                        </VStack>
+                        <VStack align="flex-start" spacing={4} w="full" mt={10} fontFamily="'Courier New', Courier, monospace">
+                            <Box w="full" borderBottom="1px dashed gray" />
+                            <Flex justify="space-between" w="full"><Text color="gray.500">IBAN</Text><Text fontWeight="bold" dir="ltr">SA24 2000 0000 9999 8888 7777</Text></Flex>
+                            {/* <Flex justify="space-between" w="full"><Text color="gray.500">ACC</Text><Text fontWeight="bold" dir="ltr">2888 888 888</Text></Flex> */}
+                            <Box w="full" borderBottom="1px dashed gray" />
+                            <Image src={logo} w="50px" filter="grayscale(100%)" opacity={0.5} alignSelf="center" mt={4} />
+                            <Text fontSize="xs" textAlign="center" w="full" opacity={0.5}>شكراً لثقتكم بنا</Text>
+                        </VStack>
+                    </MotionFlex>
+                    <MotionFlex direction="column" bg="#25D366" p={10} justify="center" align="center" minH="400px" position="relative" overflow="hidden" cursor="pointer" whileHover={{ scale: 1.02 }} onClick={() => window.open('https://wa.me/966554043696', '_blank')}>
+                        <Box position="absolute" top="-50%" left="-50%" w="200%" h="200%" bg="radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%)" />
+                        <Icon as={Iconify} icon="mdi:whatsapp" width="40px" height="40px" color="white" zIndex={1} mb={8} />
+                        <Heading color="white" fontSize="4xl" zIndex={1} textAlign="center" mb={2} fontFamily={'Cairo'}>تواصل عبر واتساب</Heading>
+                        <Text color="white" fontSize="xl" opacity={0.9} zIndex={1} mb={8}>جاهزون لتصوير مشروعك؟</Text>
+                        <Button bg="white" color="#25D366" size="lg" onClick={(e) => { e.stopPropagation(); window.open('https://wa.me/966554043696', '_blank'); }} zIndex={1} px={10} h="60px" fontSize="xl" dir="ltr">+966 55 404 3696</Button>
+                    </MotionFlex>
+                </SimpleGrid>
+            </Box>
+
+            {/* Footer */}
+            <Box p={6} borderTop="1px solid" borderColor="gray.100" textAlign="center">
+                <Text fontSize="sm" color="gray.400">© 2025 ZAIN . All Rights Reserved.</Text>
+            </Box>
+        </Box>
+    );
+};
+
+export default Home;

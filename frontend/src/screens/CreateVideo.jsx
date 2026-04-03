@@ -95,7 +95,7 @@ export default function CreateVideo() {
             formData.append('media_type', 'video');
 
             const response = await axios.post(
-                'http://192.168.3.128:8000/upload-image/',
+                'http://192.168.0.115:8000/upload-image/',
                 formData,
                 {
                     headers: {
@@ -170,7 +170,7 @@ export default function CreateVideo() {
         setCreating(true);
         try {
             await axios.post(
-                'http://192.168.3.128:8000/create-video/',
+                'http://192.168.0.115:8000/create-video/',
                 {
                     text: text,
                     image_url: imageUrl || '',

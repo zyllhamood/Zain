@@ -5,7 +5,7 @@ export const login = createAsyncThunk("auth/login", async (data, thunkAPI) => {
     const { rejectWithValue } = thunkAPI;
     try {
         const response = await axios.post(
-            "http://192.168.3.128:8000/login/",
+            "http://192.168.0.115:8000/login/",
             data,
             {
                 headers: {
@@ -24,7 +24,7 @@ export const get_info = createAsyncThunk(
     async (data, thunkAPI) => {
         const { rejectWithValue } = thunkAPI;
         try {
-            const response = await axios.get("http://192.168.3.128:8000/user-info/", {
+            const response = await axios.get("http://192.168.0.115:8000/user-info/", {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${data}`,

@@ -54,7 +54,7 @@ export default function AllPhotos() {
     const fetchPhotos = async () => {
         setLoading(true);
         try {
-            const response = await axios.get('http://192.168.3.128:8000/get-all-photos/');
+            const response = await axios.get('http://192.168.0.115:8000/get-all-photos/');
             setPhotos(response.data);
         } catch (error) {
             toast({

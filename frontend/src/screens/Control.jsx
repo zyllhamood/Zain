@@ -52,7 +52,7 @@ export default function Control() {
     const fetchPhotos = async () => {
         setLoadingPhotos(true);
         try {
-            const response = await axios.get('http://192.168.3.128:8000/get-all-photos/');
+            const response = await axios.get('http://192.168.0.115:8000/get-all-photos/');
             setPhotos(response.data);
         } catch (error) {
             toast({
@@ -72,7 +72,7 @@ export default function Control() {
     const fetchVideos = async () => {
         setLoadingVideos(true);
         try {
-            const response = await axios.get('http://192.168.3.128:8000/get-all-videos/');
+            const response = await axios.get('http://192.168.0.115:8000/get-all-videos/');
             setVideos(response.data);
         } catch (error) {
             toast({
@@ -105,7 +105,7 @@ export default function Control() {
         if (result.isConfirmed) {
             try {
                 const token = Cookies.get('access_token');
-                await axios.delete('http://192.168.3.128:8000/delete-media/', {
+                await axios.delete('http://192.168.0.115:8000/delete-media/', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ export default function Control() {
         if (result.isConfirmed) {
             try {
                 const token = Cookies.get('access_token');
-                await axios.delete('http://192.168.3.128:8000/delete-media/', {
+                await axios.delete('http://192.168.0.115:8000/delete-media/', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
